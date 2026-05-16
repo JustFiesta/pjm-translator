@@ -1,0 +1,30 @@
+---
+description: Core AI guidance for pjm-translator — references shared .ai/ instructions
+alwaysApply: true
+---
+
+# pjm-translator — AI Guidance
+
+This project uses a shared instruction set in `.ai/`. Always read the relevant files
+before starting work.
+
+## Required reading
+
+| File | When to read |
+|------|--------------|
+| `.ai/context/project.md` | Every session — project purpose, stack, architecture, conventions |
+| `.ai/workflows/research-plan-act.md` | Every non-trivial task — mandatory workflow |
+| `.ai/standards/coding.md` | Before writing or editing any Python code |
+| `.ai/standards/testing.md` | Before writing or editing any test |
+| `.ai/agents/developer.md` | When acting as implementation engineer |
+| `.ai/agents/reviewer.md` | When acting as code reviewer |
+
+## Quick rules
+
+- **Python 3.14 + uv.** Do not change `pyproject.toml` without user approval.
+- **snake_case** for all names; **PascalCase** for classes only.
+- **Type hints + Google docstrings** on every public function.
+- **Research → Plan → Act** before every implementation task.
+- **⚠️ REQUIRES USER APPROVAL** before: adding/removing deps, deleting files,
+  modifying CI/CD, or any destructive operation.
+- Keep `main.py` thin; logic belongs in `src/`.
