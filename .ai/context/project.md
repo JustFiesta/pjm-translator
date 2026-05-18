@@ -18,8 +18,8 @@ ARCH: → see SHARED.ARCH
     data/raw/                    → 550-points.csv + PJM-points.csv present (gitignored)
     src/                         → package scaffold created
       src/data/protocol.py       → DatasetSource Protocol (done)
-      src/data/ingest.py         → pending
-      src/data/extract.py        → pending
+      src/data/ingest.py         → CsvDataset (done)
+      src/data/extract.py        → build_feature_matrix (done)
       src/data/split.py          → pending
       src/model/train.py         → pending
       src/model/evaluate.py      → pending
