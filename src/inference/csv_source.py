@@ -14,7 +14,7 @@ class CsvRowSource:
     Implements the ``FeatureSource`` protocol without inheriting from it.
 
     Args:
-        csv_path: Path to a raw PJM points CSV file.
+        csv_path: Path to a Sign Language MNIST CSV file.
         row_index: Zero-based index of the row to use as the feature vector.
 
     Raises:
@@ -39,10 +39,10 @@ class CsvRowSource:
         return self._label
 
     def read_features(self) -> np.ndarray:
-        """Return the stored feature vector of shape ``(234,)``.
+        """Return the stored feature vector of shape ``(784,)``.
 
         Returns:
-            float32 array of shape ``(234,)``.
+            float32 array of shape ``(784,)``, values normalised to ``[0, 1]``.
         """
         return self._vector
 

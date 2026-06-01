@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 
 
 class FeatureSource(Protocol):
-    """Source of a single 234-dimensional feature vector ready for classification.
+    """Source of a single 784-dimensional feature vector ready for classification.
 
     Any object that implements ``read_features`` and ``release`` satisfies this
     protocol — no inheritance required.  Current implementations:
@@ -16,10 +16,10 @@ class FeatureSource(Protocol):
     """
 
     def read_features(self) -> np.ndarray:
-        """Return one feature vector of shape (234,) and dtype float32.
+        """Return one feature vector of shape (784,) and dtype float32.
 
         Returns:
-            1-D float32 numpy array with exactly 234 elements.
+            1-D float32 numpy array with exactly 784 elements.
         """
         ...
 

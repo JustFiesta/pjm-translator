@@ -3,9 +3,9 @@
 IMPORT: .ai/shared.md
 
 PURPOSE:
-  Real-time PJM → Polish translation.
+  Sign Language MNIST → Live caption.
   Stage: in development — src/ scaffold created; data pipeline and model modules in progress.
-  Dataset: https://www.kaggle.com/datasets/adamlaput/sign-language-pjm
+  Dataset: https://www.kaggle.com/datasets/datamunge/sign-language-mnist/
 
 STACK: → see SHARED.STACK
   future-deps (⚠️ GATE before adding any):
@@ -26,7 +26,7 @@ ARCH: → see SHARED.ARCH
       src/inference/protocol.py  → FeatureSource Protocol (done)
       src/inference/predict.py   → load_model, predict_sign (done)
       src/inference/csv_source.py → CsvRowSource (done)
-      src/inference/camera.py    → pending (optional, MediaPipe compat)
+      src/inference/camera.py    → CameraSource with MediaPipe 0.10.35 (done)
     tests/                       → all test files done; 25/25 passing
     .github/workflows/           → ci.yaml and train.yaml are single-line TODOs
 

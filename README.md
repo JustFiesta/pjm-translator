@@ -1,5 +1,5 @@
 # pjm-translator
 
-Real time translator from PJM to Polish native language.
+Real time translator Sign Language capture.
 
-Bases on [sign language PJM](https://www.kaggle.com/datasets/adamlaput/sign-language-pjm) dataset.
+Bases on [Sign Language MNIST](https://www.kaggle.com/datasets/datamunge/sign-language-mnist/data) dataset.

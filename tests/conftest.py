@@ -8,7 +8,7 @@ from sklearn.svm import SVC
 
 from src.data.protocol import DatasetSource
 
-FEATURE_DIM = 234
+FEATURE_DIM = 784
 N_SAMPLES = 30
 LABELS = ["A", "B", "C"]
 
