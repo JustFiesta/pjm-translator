@@ -19,7 +19,7 @@ Pipeline overview:
    - `camera` source: detect hand with MediaPipe, crop to `28x28`, predict letter
 
 Default paths:
-- dataset: `data/raw/sign_mnist_train.csv`
+- dataset: `data/sign_mnist_train.csv`
 - model: `artifacts/model.pkl`
 
 ## 2. Requirements
@@ -59,8 +59,29 @@ uv sync
 ## 4. Dataset files
 
 Expected CSV files:
-- `data/raw/sign_mnist_train.csv`
-- `data/raw/sign_mnist_test.csv`
+- `data/sign_mnist_train.csv`
+- `data/sign_mnist_test.csv`
+
+Before first run, create `data` directory and put Kaggle files there:
+
+Windows (PowerShell):
+
+```powershell
+New-Item -ItemType Directory -Path data -Force
+```
+
+Linux/macOS:
+
+```bash
+mkdir -p data
+```
+
+Download dataset from Kaggle:
+- [Sign Language MNIST (Kaggle)](https://www.kaggle.com/datasets/datamunge/sign-language-mnist/data)
+
+Then copy extracted files to:
+- `data/sign_mnist_train.csv`
+- `data/sign_mnist_test.csv`
 
 CSV schema:
 - `label` (int class id)
@@ -86,7 +107,7 @@ Where `<mode>` is required and must be one of:
 | Argument | Type / Choices | Default | Used in mode | Description |
 |---|---|---|---|---|
 | `mode` | `train`, `eval`, `infer` | - | all | Operation mode |
-| `--dataset` | path | `data/raw/sign_mnist_train.csv` | train, eval, infer(csv) | CSV dataset path |
+| `--dataset` | path | `data/sign_mnist_train.csv` | train, eval, infer(csv) | CSV dataset path |
 | `--model` | path | `artifacts/model.pkl` | train, eval, infer | Model artifact path |
 | `--classifier` | `svc`, `rf` | `svc` | train | Classifier to train |
 | `--source` | `csv`, `camera` | `csv` | infer | Inference source |
@@ -117,7 +138,7 @@ uv run python main.py train --classifier rf --model artifacts/rf_model.pkl
 ### Evaluate model
 
 ```bash
-uv run python main.py eval --model artifacts/model.pkl --dataset data/raw/sign_mnist_test.csv
+uv run python main.py eval --model artifacts/model.pkl --dataset data/sign_mnist_test.csv
 ```
 
 Output includes:
@@ -127,7 +148,7 @@ Output includes:
 ### Inference from CSV row
 
 ```bash
-uv run python main.py infer --source csv --row 42 --dataset data/raw/sign_mnist_test.csv --model artifacts/model.pkl
+uv run python main.py infer --source csv --row 42 --dataset data/sign_mnist_test.csv --model artifacts/model.pkl
 ```
 
 Output example:
@@ -151,7 +172,7 @@ Runtime behavior:
 `src/model/train.py` also has standalone CLI:
 
 ```bash
-uv run python -m src.model.train --dataset data/raw/sign_mnist_train.csv --output artifacts/model.pkl --classifier svc
+uv run python -m src.model.train --dataset data/sign_mnist_train.csv --output artifacts/model.pkl --classifier svc
 ```
 
 Arguments there:
@@ -228,6 +249,6 @@ src/data/                # CSV ingest, feature matrix, split
 src/model/               # training and evaluation
 src/inference/           # model loading, CSV source, camera source
 tests/                   # pytest tests
-data/raw/                # input dataset files
+data/                    # input dataset files (downloaded manually)
 artifacts/               # trained model files (.pkl, .task)
 ```

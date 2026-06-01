@@ -33,7 +33,7 @@ class CsvDataset:
     normalises pixel values to ``[0, 1]``, and exposes labelled feature vectors.
 
     Args:
-        csv_path: Path to the CSV file (e.g. ``data/raw/sign_mnist_train.csv``).
+        csv_path: Path to the CSV file (e.g. ``data/sign_mnist_train.csv``).
 
     Raises:
         FileNotFoundError: If ``csv_path`` does not exist.

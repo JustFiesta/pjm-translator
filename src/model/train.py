@@ -73,8 +73,8 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--dataset",
         type=Path,
-        default=Path("data/raw/sign_mnist_train.csv"),
-        help="Path to the raw CSV file.",
+        default=Path("data/sign_mnist_train.csv"),
+        help="Path to the CSV file.",
     )
     parser.add_argument(
         "--output",
