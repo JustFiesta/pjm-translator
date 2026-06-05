@@ -13,10 +13,11 @@ Dataset: [Sign Language MNIST (Kaggle)](https://www.kaggle.com/datasets/datamung
 Pipeline overview:
 1. Load Sign Language MNIST CSV (`label` + `pixel1..pixel784`).
 2. Normalize pixels to `[0, 1]`.
-3. Train classifier (`svc` or `rf`) and save to `.pkl`.
+3. Train classifier (`svc`, `rf`, or `cnn`) and save model artifacts.
 4. In inference:
    - `csv` source: classify one dataset row
-   - `camera` source: detect hand with MediaPipe, crop to `28x28`, predict letter
+   - `camera` source: detect hand via MediaPipe Gesture Recognizer, crop to
+     `28x28`, predict letter
 
 Default paths:
 - dataset: `data/sign_mnist_train.csv`
@@ -24,7 +25,7 @@ Default paths:
 
 ## 2. Requirements
 
-- Python `>=3.14`
+- Python `>=3.13`
 - `uv` package manager
 - Webcam (only for `infer --source camera`)
 
@@ -35,14 +36,15 @@ Main dependencies (from `pyproject.toml`):
 - `joblib`
 - `opencv-python`
 - `mediapipe`
+- `tensorflow` (optional, only for `--classifier cnn`)
 
 ## 3. Setup and installation
 
 ### Windows (PowerShell)
 
 ```powershell
-uv python install 3.14
-uv venv --python 3.14
+uv python install 3.13
+uv venv --python 3.13
 .venv\Scripts\Activate.ps1
 uv sync
 ```
@@ -50,8 +52,8 @@ uv sync
 ### Linux/macOS
 
 ```bash
-uv python install 3.14
-uv venv --python 3.14
+uv python install 3.13
+uv venv --python 3.13
 source .venv/bin/activate
 uv sync
 ```
@@ -108,14 +110,15 @@ Where `<mode>` is required and must be one of:
 |---|---|---|---|---|
 | `mode` | `train`, `eval`, `infer` | - | all | Operation mode |
 | `--dataset` | path | `data/sign_mnist_train.csv` | train, eval, infer(csv) | CSV dataset path |
-| `--model` | path | `artifacts/model.pkl` | train, eval, infer | Model artifact path |
-| `--classifier` | `svc`, `rf` | `svc` | train | Classifier to train |
+| `--model` | path | `artifacts/model.pkl` | train, eval, infer | Model artifact path (`.keras` required for `cnn`) |
+| `--classifier` | `svc`, `rf`, `cnn` | `svc` | train | Classifier to train |
 | `--source` | `csv`, `camera` | `csv` | infer | Inference source |
 | `--row` | int | `0` | infer(csv) | CSV row index |
 | `--camera` | int | `0` | infer(camera) | OpenCV camera device index |
 
 Notes:
 - In `train` mode, `--source`, `--row`, `--camera` are ignored.
+- For `--classifier cnn`, pass `--model` with a `.keras` path (e.g. `artifacts/cnn_model.keras`).
 - In `eval` mode, `--source`, `--row`, `--camera`, `--classifier` are ignored.
 - In `infer --source camera`, `--dataset` is ignored.
 
@@ -133,6 +136,12 @@ Train RandomForest and save to custom file:
 
 ```bash
 uv run python main.py train --classifier rf --model artifacts/rf_model.pkl
+```
+
+Train CNN (saves model and label mapping sidecar):
+
+```bash
+uv run python main.py train --classifier cnn --model artifacts/cnn_model.keras
 ```
 
 ### Evaluate model
@@ -178,7 +187,7 @@ uv run python -m src.model.train --dataset data/sign_mnist_train.csv --output ar
 Arguments there:
 - `--dataset`
 - `--output`
-- `--classifier` (`svc`/`rf`)
+- `--classifier` (`svc`/`rf`/`cnn`)
 
 Help for each CLI:
 
@@ -237,7 +246,7 @@ Use valid row index based on selected `--dataset`.
 ### MediaPipe model download
 
 On first camera run, project auto-downloads:
-- `artifacts/hand_landmarker.task`
+- `artifacts/gesture_recognizer.task`
 
 Make sure internet is available for first download.
 
@@ -250,5 +259,5 @@ src/model/               # training and evaluation
 src/inference/           # model loading, CSV source, camera source
 tests/                   # pytest tests
 data/                    # input dataset files (downloaded manually)
-artifacts/               # trained model files (.pkl, .task)
+artifacts/               # model files (.pkl / .keras / .labels.json / .task)
 ```

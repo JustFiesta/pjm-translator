@@ -48,6 +48,20 @@ def test_train_and_save_creates_parent_dirs(tmp_path: Path, sample_X_y) -> None:
     assert nested_output.exists()
 
 
+def test_train_and_save_supports_random_forest(
+    tmp_path: Path, sample_X_y
+) -> None:
+    # Arrange
+    X, y = sample_X_y
+    output = tmp_path / "rf_model.pkl"
+
+    # Act
+    train_and_save(X, y, output, classifier="rf")
+
+    # Assert
+    assert output.exists()
+
+
 def test_train_and_save_raises_on_length_mismatch() -> None:
     # Arrange
     X = np.zeros((10, 234), dtype=np.float32)
@@ -56,3 +70,27 @@ def test_train_and_save_raises_on_length_mismatch() -> None:
     # Act + Assert
     with pytest.raises(ValueError, match="same length"):
         train_and_save(X, y, Path("artifacts/model.pkl"))
+
+
+def test_train_and_save_raises_on_unknown_classifier(
+    tmp_path: Path, sample_X_y
+) -> None:
+    # Arrange
+    X, y = sample_X_y
+    output = tmp_path / "model.pkl"
+
+    # Act + Assert
+    with pytest.raises(ValueError, match="Unknown sklearn classifier"):
+        train_and_save(X, y, output, classifier="unknown")
+
+
+def test_train_and_save_rejects_non_keras_path_for_cnn(
+    tmp_path: Path, sample_X_y
+) -> None:
+    # Arrange
+    X, y = sample_X_y
+    output = tmp_path / "model.pkl"
+
+    # Act + Assert
+    with pytest.raises(ValueError, match="\\.keras"):
+        train_and_save(X, y, output, classifier="cnn")

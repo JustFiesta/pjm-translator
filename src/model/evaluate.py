@@ -1,20 +1,28 @@
 from __future__ import annotations
 
+from typing import Protocol
+
 import numpy as np
-from sklearn.base import ClassifierMixin
 from sklearn.metrics import accuracy_score, classification_report
 
 
+class Predictor(Protocol):
+    """Minimal prediction interface required by ``evaluate``."""
+
+    def predict(self, X: np.ndarray) -> np.ndarray:
+        """Return predicted labels for an input feature matrix."""
+
+
 def evaluate(
-    clf: ClassifierMixin,
+    clf: Predictor,
     X_test: np.ndarray,
     y_test: np.ndarray,
 ) -> dict[str, object]:
     """Evaluate a trained classifier on the test set and print a report.
 
     Args:
-        clf: A fitted scikit-learn classifier with a ``predict`` method.
-        X_test: Feature matrix of shape ``(n_samples, 234)``.
+        clf: A fitted predictor object with a ``predict`` method.
+        X_test: Feature matrix of shape ``(n_samples, 784)``.
         y_test: True label array of shape ``(n_samples,)``.
 
     Returns:

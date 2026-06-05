@@ -3,7 +3,7 @@ name = "pjm-translator"
 version = "0.1.0"
 description = "Real time translator from PJM to Polish native language"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.13"
 dependencies = [
     "joblib>=1.5.3",
     "mediapipe>=0.10.35",
@@ -14,4 +14,5 @@ dependencies = [
     "pytest-cov>=7.1.0",
     "ruff>=0.15.13",
     "scikit-learn>=1.8.0",
+    "tensorflow>=2.21.0",
 ]

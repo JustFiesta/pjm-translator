@@ -5,18 +5,22 @@ from pathlib import Path
 
 import joblib
 import numpy as np
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.svm import SVC
+from sklearn.base import ClassifierMixin
+
+from src.model.classifiers.cnn import train_and_save_cnn
+from src.model.classifiers.random_forest import build_random_forest_classifier
+from src.model.classifiers.svc import build_svc_classifier
 
 DEFAULT_ARTIFACT = Path("artifacts/model.pkl")
 
 CLASSIFIERS = {
-    "svc": lambda: SVC(kernel="rbf", C=10.0, gamma="scale", probability=False),
-    "rf": lambda: RandomForestClassifier(n_estimators=200, n_jobs=-1, random_state=42),
+    "svc": build_svc_classifier,
+    "rf": build_random_forest_classifier,
+    "cnn": None,
 }
 
 
-def build_classifier(name: str) -> object:
+def build_classifier(name: str) -> ClassifierMixin:
     """Instantiate a classifier by name.
 
     Args:
@@ -28,9 +32,9 @@ def build_classifier(name: str) -> object:
     Raises:
         ValueError: If ``name`` is not a recognised classifier key.
     """
-    if name not in CLASSIFIERS:
+    if name not in CLASSIFIERS or name == "cnn":
         raise ValueError(
-            f"Unknown classifier '{name}'. Choose from: {list(CLASSIFIERS)}"
+            f"Unknown sklearn classifier '{name}'. Choose from: ['svc', 'rf']"
         )
     return CLASSIFIERS[name]()
 
@@ -47,7 +51,7 @@ def train_and_save(
         X_train: Feature matrix of shape ``(n_samples, 784)``.
         y_train: Label array of shape ``(n_samples,)``.
         output_path: Destination ``.pkl`` path for the serialised model.
-        classifier: Classifier name — ``"svc"`` (default) or ``"rf"``.
+        classifier: Classifier name — ``"svc"``, ``"rf"``, or ``"cnn"``.
 
     Raises:
         ValueError: If ``X_train`` and ``y_train`` have different lengths,
@@ -58,6 +62,24 @@ def train_and_save(
             f"X_train and y_train must have the same length, "
             f"got {len(X_train)} and {len(y_train)}."
         )
+
+    if classifier == "cnn":
+        if output_path.suffix != ".keras":
+            raise ValueError(
+                "CNN artifacts must use the '.keras' extension. "
+                f"Got: {output_path}"
+            )
+        labels_path = output_path.with_suffix(".labels.json")
+        print("Classifier: KerasCNN")
+        train_and_save_cnn(
+            X_train=X_train,
+            y_train=y_train,
+            model_path=output_path,
+            labels_path=labels_path,
+        )
+        print(f"Model saved to {output_path}")
+        print(f"Labels saved to {labels_path}")
+        return
 
     clf = build_classifier(classifier)
     print(f"Classifier: {clf.__class__.__name__}")

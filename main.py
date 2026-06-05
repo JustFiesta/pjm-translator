@@ -195,9 +195,12 @@ def main() -> None:
     )
     parser.add_argument(
         "--classifier",
-        choices=["svc", "rf"],
+        choices=["svc", "rf", "cnn"],
         default="svc",
-        help="Classifier to train: 'svc' (default) or 'rf' (RandomForest).",
+        help=(
+            "Classifier to train: 'svc' (default), 'rf' (RandomForest), "
+            "or 'cnn' (requires a .keras --model path)."
+        ),
     )
     args = parser.parse_args()
 

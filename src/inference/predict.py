@@ -1,25 +1,38 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Protocol
 
 import joblib
-from sklearn.base import ClassifierMixin
+import numpy as np
 
 from src.inference.protocol import FeatureSource
+from src.model.classifiers.cnn import load_cnn_predictor
 
 
-def load_model(path: Path) -> ClassifierMixin:
-    """Load a serialised scikit-learn classifier from disk.
+class Predictor(Protocol):
+    """Minimal prediction interface used by inference and evaluation."""
+
+    def predict(self, X: np.ndarray) -> np.ndarray:
+        """Return predicted labels for input features."""
+
+
+def load_model(path: Path) -> Predictor:
+    """Load a serialised classifier/predictor artifact from disk.
 
     Args:
-        path: Path to a ``.pkl`` file produced by ``train_and_save``.
+        path: Path to a ``.pkl`` (sklearn) or ``.keras`` (CNN) artifact.
 
     Returns:
-        The deserialised classifier.
+        Predictor object exposing ``predict``.
 
     Raises:
         FileNotFoundError: If ``path`` does not exist.
     """
+    if path.suffix == ".keras":
+        labels_path = path.with_suffix(".labels.json")
+        return load_cnn_predictor(path, labels_path)
+
     if not path.exists():
         raise FileNotFoundError(
             f"Model artifact not found: {path}. "
@@ -28,15 +41,15 @@ def load_model(path: Path) -> ClassifierMixin:
     return joblib.load(path)
 
 
-def predict_sign(clf: ClassifierMixin, source: FeatureSource) -> str:
+def predict_sign(clf: Predictor, source: FeatureSource) -> str:
     """Classify one feature vector obtained from ``source``.
 
-    Reads a single 234-dim vector from ``source``, passes it through the
+    Reads a single 784-dim vector from ``source``, passes it through the
     classifier, and returns the predicted sign label.  The caller is
     responsible for calling ``source.release()`` when done.
 
     Args:
-        clf: A fitted scikit-learn classifier (loaded via ``load_model``).
+        clf: A fitted predictor (loaded via ``load_model``).
         source: Any object satisfying the ``FeatureSource`` protocol.
 
     Returns:
