@@ -15,40 +15,27 @@ Podczas weryfikacji inferencji kamerowej przyjęto następujące warunki:
 Zmiana warunków oświetlenia lub geometrii kadru obniża jakość detekcji dłoni,
 a tym samym stabilność predykcji.
 
-\section{Wyniki porównawcze modeli}
-\label{sec:wyniki_porownawcze}
+\subsection{Dokładność na zbiorze testowym}
 
-Na podstawie danych projektu uzyskano następujące wyniki dokładności:
 \begin{table}[H]
     \centering
-    \caption{Porównanie modeli klasyfikacyjnych}
-    \label{tab:model_benchmark}
-    \begin{tabular}{lcc}
+    \caption{Porównanie dokładności klasyfikatorów na zbiorze testowym Sign Language MNIST}
+    \label{tab:wyniki}
+    \begin{tabular}{llr}
         \toprule
-        \textbf{Model}        & \textbf{Artefakt}                  & \textbf{Dokładność testowa} \\
+        \textbf{Model} & \textbf{Plik artefaktu} & \textbf{Dok. testowa} \\
         \midrule
-        SVC (RBF)             & \texttt{artifacts/svc\_model.pkl}  & 0,82                        \\
-        Random Forest         & \texttt{artifacts/rf\_model.pkl}   & 0,82                        \\
-        CNN (Keras / TF)      & \texttt{artifacts/cnn\_model.keras}& 0,92                        \\
+        SVC (jądro RBF)        & \texttt{artifacts/svc\_model.pkl}   & 0{,}82 \\
+        Las Losowy (200 drzew) & \texttt{artifacts/rf\_model.pkl}    & 0{,}82 \\
+        CNN (Keras/TF)         & \texttt{artifacts/cnn\_model.keras} & \textbf{0{,}92} \\
         \bottomrule
     \end{tabular}
 \end{table}
 
-Wyniki wskazują przewagę modelu CNN, co jest zgodne z charakterem danych
-obrazowych, dla których lokalne cechy przestrzenne mają istotne znaczenie.
+CNN osiąga wyraźnie wyższą dokładność (92\%) w porównaniu z SVC i RF (oba~82\%).
+Wynik jest spójny z literaturą --- architektury konwolucyjne są naturalnie
+przystosowane do danych obrazowych.
 
-\section{Schemat przepływu systemu}
-\label{sec:schemat_przeplywu}
-
-Architekturę wysokiego poziomu projektu przedstawiono na rysunku
-\ref{fig:architektura_systemu}.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\linewidth]{../../diagrams/architecture.png}
-    \caption{Architektura rozwiązania: dane, trening i inferencja}
-    \label{fig:architektura_systemu}
-\end{figure}
 
 \section{Analiza jakości inferencji w czasie rzeczywistym}
 \label{sec:analiza_live}

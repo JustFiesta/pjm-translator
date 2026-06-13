@@ -87,29 +87,7 @@ uv run python main.py infer \
     --model artifacts/svc_model.pkl
 \end{lstlisting}
 
-\section{Wyniki}
-
-\subsection{Dokładność na zbiorze testowym}
-
-\begin{table}[H]
-    \centering
-    \caption{Porównanie dokładności klasyfikatorów na zbiorze testowym Sign Language MNIST}
-    \label{tab:wyniki}
-    \begin{tabular}{llr}
-        \toprule
-        \textbf{Model} & \textbf{Plik artefaktu} & \textbf{Dok. testowa} \\
-        \midrule
-        SVC (jądro RBF)        & \texttt{artifacts/svc\_model.pkl}   & 0{,}82 \\
-        Las Losowy (200 drzew) & \texttt{artifacts/rf\_model.pkl}    & 0{,}82 \\
-        CNN (Keras/TF)         & \texttt{artifacts/cnn\_model.keras} & \textbf{0{,}92} \\
-        \bottomrule
-    \end{tabular}
-\end{table}
-
-CNN osiąga wyraźnie wyższą dokładność (92\%) w porównaniu z SVC i RF (oba~82\%).
-Wynik jest spójny z literaturą --- architektury konwolucyjne są naturalnie
-przystosowane do danych obrazowych.
-
+\newpage
 \subsection{Obserwacje jakościowe z inferencji kamerowej}
 
 \begin{itemize}
@@ -164,16 +142,3 @@ przycięty i przeskalowany fragment klatki jest znacznie bardziej zbliżony
 do próbek treningowych niż surowy obraz z kamery. Bez tego kroku predykcje
 byłyby praktycznie bezużyteczne. Jednocześnie MediaPipe bywa zawodny
 przy słabym oświetleniu lub gdy dłoń nie jest wyraźnie wyeksponowana.
-
-\subsection{Kierunki ulepszeń}
-
-\begin{enumerate}
-    \item Zastąpienie pikseli punktami kluczowymi MediaPipe (21 wartości xyz)
-          jako cechami wejściowymi --- reprezentacja bardziej abstrakcyjna
-          i mniej wrażliwa na oświetlenie.
-    \item Augmentacja danych (obroty, skalowanie, szum gaussowski) podczas
-          trenowania CNN.
-    \item Transfer learning na modelach wstępnie wytrenowanych (np. MobileNetV3).
-    \item Strojenie hiperparametrów SVC (parametry $C$ i $\gamma$) za pomocą
-          przeszukiwania siatki (\textit{GridSearchCV}).
-\end{enumerate}

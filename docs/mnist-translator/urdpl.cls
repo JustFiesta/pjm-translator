@@ -55,7 +55,7 @@
 \def\department#1   {\gdef\@department{#1}}                 % Nazwa instytutu lub katerdy
 \def\degreeprogramme#1 {\gdef\@degreeprogramme{#1}}         % nazwa kierunku studiów 
 \def\noAlbum#1 {\gdef\@noAlbum{#1}}                         % numer albumu
-\def\thesisDone#1 {\gdef\@thesisDone{#1}}                         % numer albumu
+\def\thesisDone#1 {\gdef\@thesisDone{#1}}                   % numer albumu
 
 \linespread{1.3}                    % odstęp miedzy wierszami 1.5 w latex 1.3 poniewaz zapis 1.3 interpretowany jest jako 1.5
 %\renewcommand{\labelitemi}{--}

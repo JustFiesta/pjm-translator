@@ -1,34 +1,9 @@
-\chapter{Wnioski i dodatek}
+\chapter{Instrukcja uruchomienia}
 \label{cha:chapter005}
 
-\section{Wnioski}
+\section{Kroki uruchomienia programu}
 
-\begin{enumerate}
-    \item \textbf{CNN przewyższa metody klasyczne} na zadaniu klasyfikacji
-          znaków ASL: osiąga 92\% dokładności wobec 82\% dla SVC i Lasu
-          Losowego. Architektura konwolucyjna jest naturalnie dostosowana
-          do danych obrazowych.
-    \item \textbf{SVC i Las Losowy osiągają identyczną dokładność} (82\%)
-          pomimo różnych strategii uczenia, co sugeruje, że obie metody
-          osiągnęły podobną granicę dla tej reprezentacji danych.
-    \item \textbf{Jakość inferencji kamerowej zależy od warunków zewnętrznych}
-          --- oświetlenia, tła i pozycji dłoni --- bardziej niż od wyboru
-          klasyfikatora.
-    \item \textbf{MediaPipe odgrywa kluczową rolę} w przygotowaniu wejścia
-          modelu; bez etapu detekcji dłoni system nie nadaje się do praktycznego
-          zastosowania.
-    \item \textbf{Podejście pikselowe ma istotne ograniczenia praktyczne}.
-          Reprezentacja oparta na punktach kluczowych mogłaby znacząco
-          poprawić odporność systemu na zmienne warunki otoczenia.
-    \item \textbf{Modularna architektura projektu} (rozdzielenie warstw danych,
-          modeli i inferencji) ułatwia wymianę komponentów i jest dobrą
-          praktyką inżynierską w projektach uczenia maszynowego.
-\end{enumerate}
-
-\section*{Dodatek: Instrukcja samodzielnej realizacji ćwiczenia}
-\addcontentsline{toc}{section}{Dodatek: Instrukcja samodzielnej realizacji ćwiczenia}
-
-Poniższy przewodnik umożliwia samodzielne przeprowadzenie ćwiczenia od
+Poniższy przewodnik umożliwia samodzielne uruchomienie programu od
 konfiguracji środowiska po uruchomienie inferencji na żywo.
 
 \subsection*{Krok 1: Pobranie repozytorium}
@@ -118,6 +93,7 @@ uv run python main.py infer \
     --model artifacts/svc_model.pkl
 \end{lstlisting}
 
+\newpage
 \subsection*{Krok 7: Inferencja na żywo z kamery}
 
 \begin{lstlisting}[style=styleBash, numbers=none, caption={Uruchomienie inferencji w czasie rzeczywistym}, label=lst:infer-live]
@@ -147,14 +123,3 @@ uv run pytest
 uv run pytest --cov=src --cov-report=term-missing
 \end{lstlisting}
 
-\subsection*{Pytania kontrolne}
-
-\begin{enumerate}
-    \item Dlaczego litery J i Z nie są uwzględnione w zbiorze Sign Language MNIST?
-    \item Jaką rolę pełni MediaPipe w potoku inferencji kamerowej?
-    \item Co oznacza stratyfikowany podział danych i dlaczego jest ważny
-          przy niezbalansowanych klasach?
-    \item Jaka jest różnica między parametrami $C$ i $\gamma$ w SVC z jądrem RBF?
-    \item Dlaczego CNN osiąga wyższą dokładność niż SVC na danych obrazowych?
-    \item W jaki sposób można poprawić odporność systemu na zmienne oświetlenie?
-\end{enumerate}

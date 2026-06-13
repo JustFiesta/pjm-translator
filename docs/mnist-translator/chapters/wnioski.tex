@@ -1,0 +1,46 @@
+\chapter{Wnioski}
+\label{cha:wnioski}
+
+\section{Podsumowanie realizacji}
+\label{sec:podsumowanie}
+
+W ramach projektu zrealizowano kompletny pipeline klasyfikacji znaków dłoni:
+od przygotowania danych tablicowych, przez uczenie i ewaluację modeli,
+po inferencję z kamery w czasie rzeczywistym. Implementacja zachowuje
+spójny format wejścia (28$\times$28, 784 cechy), co pozwala stosować
+różne klasyfikatory bez zmian interfejsu danych.
+
+\begin{enumerate}
+      \item \textbf{CNN przewyższa metody klasyczne} na zadaniu klasyfikacji
+            znaków ASL: osiąga 92\% dokładności wobec 82\% dla SVC i Lasu
+            Losowego. Architektura konwolucyjna jest naturalnie dostosowana
+            do danych obrazowych.
+      \item \textbf{SVC i Las Losowy osiągają identyczną dokładność} (82\%)
+            pomimo różnych strategii uczenia, co sugeruje, że obie metody
+            osiągnęły podobną granicę dla tej reprezentacji danych.
+      \item \textbf{Jakość inferencji kamerowej zależy od warunków zewnętrznych}
+            --- oświetlenia, tła i pozycji dłoni --- bardziej niż od wyboru
+            klasyfikatora.
+      \item \textbf{MediaPipe odgrywa kluczową rolę} w przygotowaniu wejścia
+            modelu; bez etapu detekcji dłoni system nie nadaje się do praktycznego
+            zastosowania.
+      \item \textbf{Podejście pikselowe ma istotne ograniczenia praktyczne}.
+            Reprezentacja oparta na punktach kluczowych mogłaby znacząco
+            poprawić odporność systemu na zmienne warunki otoczenia.
+      \item \textbf{Modularna architektura projektu} (rozdzielenie warstw danych,
+            modeli i inferencji) ułatwia wymianę komponentów i jest dobrą
+            praktyką inżynierską w projektach uczenia maszynowego.
+  \end{enumerate}
+
+\section{Kierunki dalszego rozwoju}
+\label{sec:dalszy_rozwoj}
+
+Rozszerzenia, które mogą poprawić jakość i użyteczność systemu:
+\begin{itemize}
+    \item dodanie modelu sekwencyjnego (np. LSTM/Transformer) dla rozpoznawania
+          gestów dynamicznych,
+    \item wygładzanie predykcji w oknie czasowym,
+    \item augmentacja danych i rozszerzenie zbioru treningowego o rzeczywiste
+          próbki z kamery,
+    \item budowa modułu oceny wydajności czasu inferencji na różnych urządzeniach.
+\end{itemize}
