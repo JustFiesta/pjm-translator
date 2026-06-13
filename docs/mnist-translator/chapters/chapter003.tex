@@ -1,0 +1,179 @@
+\chapter{Eksperymenty i wyniki}
+\label{cha:chapter003}
+
+\section{Opis eksperymentów}
+
+\subsection{Cel eksperymentów}
+
+Eksperymenty miały na celu porównanie trzech metod klasyfikacji pod względem
+dokładności na tych samych danych testowych oraz jakości predykcji w warunkach
+rzeczywistych (inferencja z kamery).
+
+\subsection{Podział danych}
+
+Dane treningowe z pliku \texttt{sign\_mnist\_train.csv} zostały podzielone
+stratyfikowanie na podzbiory:
+
+\begin{itemize}
+    \item \textbf{Treningowy (80\%)} --- używany do dopasowania parametrów modelu.
+    \item \textbf{Walidacyjny (10\%)} --- opcjonalnie do strojenia hiperparametrów.
+    \item \textbf{Testowy (10\%)} --- do pomiaru końcowej dokładności.
+\end{itemize}
+
+Plik \texttt{sign\_mnist\_test.csv} (7\,172 próbki) pełnił rolę niezależnego
+zbioru testowego wymaganego przez dokumentację projektu.
+
+\subsection{Procedura trenowania i ewaluacji}
+
+Dla każdego klasyfikatora procedura była identyczna:
+
+\begin{enumerate}
+    \item Wczytanie \texttt{sign\_mnist\_train.csv} i normalizacja pikseli.
+    \item Stratyfikowany podział 80/10/10.
+    \item Trenowanie modelu na zbiorze treningowym.
+    \item Zapis artefaktu do katalogu \texttt{artifacts/}.
+    \item Ewaluacja na niezależnym zbiorze testowym.
+\end{enumerate}
+
+\subsubsection{Trenowanie SVC}
+
+\begin{lstlisting}[style=styleBash, caption={Polecenie trenowania klasyfikatora SVC}, label=lst:train-svc]
+uv run python main.py train \
+    --classifier svc \
+    --model artifacts/svc_model.pkl \
+    --dataset data/raw/sign_mnist_train.csv
+\end{lstlisting}
+
+\subsubsection{Trenowanie Lasu Losowego}
+
+\begin{lstlisting}[style=styleBash, caption={Polecenie trenowania Lasu Losowego}, label=lst:train-rf]
+uv run python main.py train \
+    --classifier rf \
+    --model artifacts/rf_model.pkl \
+    --dataset data/raw/sign_mnist_train.csv
+\end{lstlisting}
+
+\subsubsection{Trenowanie CNN}
+
+\begin{lstlisting}[style=styleBash, caption={Polecenie trenowania CNN}, label=lst:train-cnn]
+uv run python main.py train \
+    --classifier cnn \
+    --model artifacts/cnn_model.keras \
+    --dataset data/raw/sign_mnist_train.csv
+\end{lstlisting}
+
+\subsubsection{Ewaluacja modeli}
+
+\begin{lstlisting}[style=styleBash, caption={Ewaluacja modelu SVC na zbiorze testowym}, label=lst:eval]
+uv run python main.py eval \
+    --model artifacts/svc_model.pkl \
+    --dataset data/raw/sign_mnist_test.csv
+\end{lstlisting}
+
+Wynikiem jest dokładność globalna oraz raport \texttt{classification\_report}
+ze scikit-learn zawierający precyzję, czułość i miarę F1 dla każdej klasy.
+
+\subsection{Test w warunkach rzeczywistych}
+
+Po wytrenowaniu modeli przeprowadzono testy jakościowe z użyciem kamery
+internetowej, zachowując warunki zestawione w tabeli~\ref{tab:warunki}.
+Każdą z 24 liter testowano przez minimum 5 sekund, obserwując stabilność
+predykcji w oknie OpenCV.
+
+\begin{lstlisting}[style=styleBash, caption={Uruchomienie inferencji z kamery}, label=lst:infer-cam]
+uv run python main.py infer \
+    --source camera \
+    --camera 0 \
+    --model artifacts/svc_model.pkl
+\end{lstlisting}
+
+\section{Wyniki}
+
+\subsection{Dokładność na zbiorze testowym}
+
+\begin{table}[H]
+    \centering
+    \caption{Porównanie dokładności klasyfikatorów na zbiorze testowym Sign Language MNIST}
+    \label{tab:wyniki}
+    \begin{tabular}{llr}
+        \toprule
+        \textbf{Model} & \textbf{Plik artefaktu} & \textbf{Dok. testowa} \\
+        \midrule
+        SVC (jądro RBF)        & \texttt{artifacts/svc\_model.pkl}   & 0{,}82 \\
+        Las Losowy (200 drzew) & \texttt{artifacts/rf\_model.pkl}    & 0{,}82 \\
+        CNN (Keras/TF)         & \texttt{artifacts/cnn\_model.keras} & \textbf{0{,}92} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+CNN osiąga wyraźnie wyższą dokładność (92\%) w porównaniu z SVC i RF (oba~82\%).
+Wynik jest spójny z literaturą --- architektury konwolucyjne są naturalnie
+przystosowane do danych obrazowych.
+
+\subsection{Obserwacje jakościowe z inferencji kamerowej}
+
+\begin{itemize}
+    \item \textbf{SVC} --- predykcja stabilna w dobrym oświetleniu, wrażliwa
+          na obrót dłoni i niejednolite tło.
+    \item \textbf{Las Losowy} --- podobna stabilność jak SVC; tendencja do
+          nadmiernej pewności siebie przy niskiej jakości obrazu.
+    \item \textbf{CNN} --- najbardziej odporna predykcja; lepiej radzi sobie
+          z lekkimi zmianami pozycji dłoni i oświetlenia.
+\end{itemize}
+
+We wszystkich modelach litery wizualnie podobne (np. M/N, R/U) powodowały
+częstsze błędy klasyfikacji.
+
+\section{Dyskusja wyników}
+
+\subsection{Przewaga CNN nad metodami klasycznymi}
+
+Różnica 10 punktów procentowych na korzyść CNN wynika z fundamentalnej cechy
+architektury: warstwy konwolucyjne uczą się hierarchicznych reprezentacji
+przestrzennych --- krawędzi, narożników i wzorców wyższego rzędu --- których
+płaski wektor 784 cech nie przekazuje. SVC i RF operują na przestrzeni
+784-wymiarowej bez żadnego uwzględnienia sąsiedztwa pikseli.
+
+\subsection{Równoważność SVC i Lasu Losowego}
+
+Zbliżona dokładność obu metod (82\%) sugeruje, że granica decyzyjna
+jest podobnie złożona: wystarczająco skomplikowana, by wymagać nieliniowych
+metod, ale niewystarczająco złożona, by jedna metoda miała wyraźną przewagę
+bez dalszego strojenia hiperparametrów.
+
+\subsection{Ograniczenia podejścia pikselowego}
+
+Operowanie na surowych pikselach po normalizacji wiąże się z istotnymi
+ograniczeniami praktycznymi:
+
+\begin{itemize}
+    \item \textbf{Wrażliwość na oświetlenie} --- zmiana natężenia lub kierunku
+          światła modyfikuje wartości pikseli i może prowadzić do błędnych
+          predykcji.
+    \item \textbf{Wrażliwość na pozycję} --- dłoń musi być wycentrowana w kadrze
+          i podobnej skali co próbki treningowe.
+    \item \textbf{Brak niezmienności geometrycznej} --- modele nie są z natury
+          niezmiennicze na obrót, skalę ani przesunięcie; CNN częściowo
+          kompensuje to przez operację \textit{max pooling}.
+\end{itemize}
+
+\subsection{Rola MediaPipe w systemie}
+
+Kluczową rolą MediaPipe jest dostarczenie bounding boxa dłoni, dzięki czemu
+przycięty i przeskalowany fragment klatki jest znacznie bardziej zbliżony
+do próbek treningowych niż surowy obraz z kamery. Bez tego kroku predykcje
+byłyby praktycznie bezużyteczne. Jednocześnie MediaPipe bywa zawodny
+przy słabym oświetleniu lub gdy dłoń nie jest wyraźnie wyeksponowana.
+
+\subsection{Kierunki ulepszeń}
+
+\begin{enumerate}
+    \item Zastąpienie pikseli punktami kluczowymi MediaPipe (21 wartości xyz)
+          jako cechami wejściowymi --- reprezentacja bardziej abstrakcyjna
+          i mniej wrażliwa na oświetlenie.
+    \item Augmentacja danych (obroty, skalowanie, szum gaussowski) podczas
+          trenowania CNN.
+    \item Transfer learning na modelach wstępnie wytrenowanych (np. MobileNetV3).
+    \item Strojenie hiperparametrów SVC (parametry $C$ i $\gamma$) za pomocą
+          przeszukiwania siatki (\textit{GridSearchCV}).
+\end{enumerate}

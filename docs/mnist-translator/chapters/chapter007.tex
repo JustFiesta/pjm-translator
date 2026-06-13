@@ -1,0 +1,83 @@
+\chapter{Wyniki i analiza}
+\label{cha:elementyPracy}
+
+\section{Założenia środowiska testowego}
+\label{sec:warunki_testowe}
+
+Podczas weryfikacji inferencji kamerowej przyjęto następujące warunki:
+\begin{itemize}
+    \item równomierne oświetlenie bez silnych cieni,
+    \item jednolite tło ograniczające fałszywe detekcje,
+    \item dłoń ustawiona frontalnie względem kamery,
+    \item wyłączone odbicie lustrzane obrazu.
+\end{itemize}
+
+Zmiana warunków oświetlenia lub geometrii kadru obniża jakość detekcji dłoni,
+a tym samym stabilność predykcji.
+
+\section{Wyniki porównawcze modeli}
+\label{sec:wyniki_porownawcze}
+
+Na podstawie danych projektu uzyskano następujące wyniki dokładności:
+\begin{table}[H]
+    \centering
+    \caption{Porównanie modeli klasyfikacyjnych}
+    \label{tab:model_benchmark}
+    \begin{tabular}{lcc}
+        \toprule
+        \textbf{Model}        & \textbf{Artefakt}                  & \textbf{Dokładność testowa} \\
+        \midrule
+        SVC (RBF)             & \texttt{artifacts/svc\_model.pkl}  & 0,82                        \\
+        Random Forest         & \texttt{artifacts/rf\_model.pkl}   & 0,82                        \\
+        CNN (Keras / TF)      & \texttt{artifacts/cnn\_model.keras}& 0,92                        \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+Wyniki wskazują przewagę modelu CNN, co jest zgodne z charakterem danych
+obrazowych, dla których lokalne cechy przestrzenne mają istotne znaczenie.
+
+\section{Schemat przepływu systemu}
+\label{sec:schemat_przeplywu}
+
+Architekturę wysokiego poziomu projektu przedstawiono na rysunku
+\ref{fig:architektura_systemu}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{../../diagrams/architecture.png}
+    \caption{Architektura rozwiązania: dane, trening i inferencja}
+    \label{fig:architektura_systemu}
+\end{figure}
+
+\section{Analiza jakości inferencji w czasie rzeczywistym}
+\label{sec:analiza_live}
+
+W trybie \texttt{infer --source camera} system wykonuje predykcję dla każdej
+klatki wejściowej. Jakość predykcji zależy od:
+\begin{enumerate}
+    \item poprawnej detekcji konturu dłoni przez MediaPipe,
+    \item jakości kadrowania i skalowania do 28$\times$28,
+    \item zgodności rozkładu danych wejściowych z rozkładem treningowym.
+\end{enumerate}
+
+Najczęstsze problemy obserwowane podczas demonstracji:
+\begin{itemize}
+    \item brak dostępu do kamery (\texttt{camera index} zajęty),
+    \item słaba separacja dłoni od tła,
+    \item częściowe wyjście dłoni poza obszar kadru.
+\end{itemize}
+
+\section{Ograniczenia obecnej wersji}
+\label{sec:ograniczenia}
+
+Wersja aktualna jest rozwiązaniem klasyfikacji pojedynczych klatek i nie
+modeluje dynamiki ruchu. Oznacza to, że:
+\begin{itemize}
+    \item znaki wymagające ruchu (np. J, Z) nie są klasyfikowane,
+    \item brak jest mechanizmu wygładzania predykcji po czasie,
+    \item brak detekcji kontekstu sekwencji gestów.
+\end{itemize}
+
+Mimo tych ograniczeń projekt spełnia cel dydaktyczny i demonstracyjny:
+spójny pipeline od danych tablicowych do inferencji online.

@@ -1,0 +1,93 @@
+\chapter{Implementacja systemu}
+\label{cha:pierwszyDokument}
+
+\section{Architektura logiczna}
+\label{sec:architektura_logiczna}
+
+Projekt został podzielony na trzy warstwy:
+\begin{itemize}
+    \item \texttt{src/data} -- przygotowanie danych i podziały zbioru,
+    \item \texttt{src/model} -- uczenie i ewaluacja klasyfikatorów,
+    \item \texttt{src/inference} -- predykcja offline i online (kamera).
+\end{itemize}
+
+Warstwa wejściowa CLI znajduje się w \texttt{main.py} i deleguje logikę do
+modułów w \texttt{src/}. Takie podejście upraszcza testowanie i ogranicza
+sprzężenie między interfejsem użytkownika a logiką przetwarzania.
+
+\section{Przetwarzanie danych}
+\label{sec:przetwarzanie_danych}
+
+Klasa \texttt{CsvDataset} ładuje plik CSV i wymusza spójność schematu
+(obecność kolumny \texttt{label} oraz dokładnie 784 cechy obrazu). Dla każdej
+próbki zwracana jest para:
+\begin{center}
+    \texttt{(feature\_vector: np.ndarray, label: str)}
+\end{center}
+
+Wektor cech jest typu \texttt{float32} i przyjmuje wartości w $[0,1]$.
+Etykiety numeryczne przekształcane są do liter poprzez mapowanie:
+\begin{equation}
+    y_{letter} = \mathrm{chr}(\mathrm{ord}('A') + y_{int})
+\end{equation}
+
+Budowa macierzy cech realizowana jest przez \texttt{build\_feature\_matrix},
+a podział danych przez \texttt{stratified\_split}. Domyślnie stosowany jest
+podział 80/10/10 z zachowaniem proporcji klas.
+
+\section{Uczenie modeli}
+\label{sec:uczenie_modeli}
+
+Moduł \texttt{src/model/train.py} obsługuje trzy warianty klasyfikatorów:
+\begin{itemize}
+    \item \textbf{SVC (RBF)} -- domyślny klasyfikator oparty o jądro radialne,
+    \item \textbf{Random Forest} -- las losowy o 200 drzewach,
+    \item \textbf{CNN (Keras)} -- sieć konwolucyjna dla wejścia 28$\times$28.
+\end{itemize}
+
+Modele klasyczne serializowane są przez \texttt{joblib} do formatu
+\texttt{.pkl}. Model konwolucyjny zapisywany jest jako \texttt{.keras}
+oraz osobny plik mapowania etykiet \texttt{.labels.json}.
+
+\section{Ewaluacja jakości}
+\label{sec:ewaluacja_jakosci}
+
+Funkcja \texttt{evaluate} oblicza dokładność globalną oraz raport klasyfikacji
+\texttt{classification\_report} biblioteki scikit-learn \cite{sklearn_docs}.
+Wyniki zwracane są również jako słownik, co upraszcza dalsze automatyczne
+raportowanie.
+
+\section{Inferencja: CSV i kamera}
+\label{sec:inferencja_csv_kamera}
+
+Inferencja offline z jednego wiersza CSV realizowana jest przez
+\texttt{CsvRowSource}. Inferencja online wykorzystuje klasę \texttt{CameraSource},
+która:
+\begin{enumerate}
+    \item pobiera klatkę z kamery (OpenCV \cite{opencv_docs}),
+    \item wykrywa dłoń przez MediaPipe GestureRecognizer \cite{mediapipe_docs},
+    \item wyznacza obszar dłoni i dokonuje kadrowania,
+    \item przeskalowuje obraz do 28$\times$28 oraz normalizuje piksele,
+    \item przekazuje wektor 784 cech do modelu.
+\end{enumerate}
+
+W przypadku braku detekcji dłoni moduł zwraca wektor zerowy, dzięki czemu
+interfejs inferencji pozostaje stabilny.
+
+\section{Interfejs CLI}
+\label{sec:interfejs_cli}
+
+Plik \texttt{main.py} udostępnia trzy tryby:
+\begin{itemize}
+    \item \texttt{train} -- trening wybranego klasyfikatora,
+    \item \texttt{eval} -- ewaluacja zapisanego modelu,
+    \item \texttt{infer} -- predykcja z CSV lub kamery.
+\end{itemize}
+
+Przykładowe użycie:
+\begin{lstlisting}[style=stylePython,caption={Przyklady uruchomien CLI}]
+uv run python main.py train --classifier svc --model artifacts/svc_model.pkl
+uv run python main.py eval --model artifacts/svc_model.pkl --dataset data/raw/sign_mnist_test.csv
+uv run python main.py infer --source csv --row 42 --dataset data/raw/sign_mnist_test.csv
+uv run python main.py infer --source camera --camera 0 --model artifacts/svc_model.pkl
+\end{lstlisting}

@@ -1,0 +1,120 @@
+\chapter{Cel projektu i wprowadzenie teoretyczne}
+\label{cha:chapter001}
+
+\section{Cel projektu}
+
+Celem ćwiczenia jest zaprojektowanie i zaimplementowanie systemu klasyfikacji
+statycznych gestów dłoni odpowiadających literom amerykańskiego języka migowego
+(ASL --- \textit{American Sign Language}). System o nazwie \textbf{mnist-translator}
+pracuje w czasie rzeczywistym, korzystając z obrazu z kamery internetowej,
+i jest w stanie rozpoznać 24 litery alfabetu ASL (A--Y, z wyłączeniem liter J
+i~Z, które wymagają ruchu dłoni).
+
+Szczegółowe cele ćwiczenia laboratoryjnego obejmują:
+
+\begin{itemize}
+    \item zapoznanie się ze zbiorem danych Sign Language MNIST --- jego strukturą,
+          liczebnością klas i formatem próbek,
+    \item opanowanie potoku przetwarzania obrazu: od przechwycenia klatki wideo
+          przez detekcję dłoni za pomocą biblioteki MediaPipe, aż po ekstrakcję
+          wektora cech dla klasyfikatora,
+    \item wytrenowanie i porównanie trzech modeli uczenia maszynowego:
+          \textbf{SVC z jądrem RBF}, \textbf{Lasu Losowego} oraz
+          \textbf{konwolucyjnej sieci neuronowej (CNN)},
+    \item opracowanie modułowej aplikacji konsolowej umożliwiającej trenowanie,
+          ewaluację i uruchamianie wnioskowania zarówno offline (z pliku CSV),
+          jak i na żywo (z kamery),
+    \item sformułowanie wniosków o możliwościach zastosowania klasyfikatorów
+          pikselowych do rozpoznawania gestów w warunkach rzeczywistych.
+\end{itemize}
+
+\section{Wprowadzenie teoretyczne}
+
+\subsection{Zbiór danych Sign Language MNIST}
+
+Sign Language MNIST jest adaptacją oryginalnego zbioru MNIST cyfr~\cite{lecun1998}
+do zadania rozpoznawania liter języka migowego. Każda próbka to obraz dłoni
+o rozmiarze $28 \times 28$ pikseli w skali szarości, spłaszczony do wektora
+784~cech liczbowych (wartości pikseli 0--255).
+
+\begin{table}[H]
+    \centering
+    \caption{Statystyki zbioru danych Sign Language MNIST}
+    \label{tab:dataset}
+    \begin{tabular}{lrr}
+        \toprule
+        \textbf{Podzbiór} & \textbf{Liczba próbek} & \textbf{Liczba klas} \\
+        \midrule
+        Treningowy & 27\,455 & 24 \\
+        Testowy    & 7\,172  & 24 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+Litery J (indeks 9) i Z (indeks 25) zostały wyłączone ze zbioru, ponieważ
+ich znaki ASL wymagają ruchu i nie mogą być reprezentowane przez pojedynczy
+obraz statyczny. Mapowanie etykiet na litery opisuje wzór:
+\[
+    \text{litera} = \texttt{chr}\!\left(\texttt{ord}(\text{'A'}) + \text{label}\right),
+    \quad \text{label} \in \{0,1,\ldots,8,10,\ldots,24\}.
+\]
+
+\subsection{Metody klasyfikacji}
+
+\subsubsection{Maszyna wektorów nośnych (SVM/SVC)}
+
+Maszyna wektorów nośnych~\cite{cortes1995} szuka hiperpłaszczyzny maksymalnie
+rozdzielającej klasy w przestrzeni cech. W przypadku nieliniowych granic decyzji
+stosowane są jądra (\textit{kernels}), które implicitnie mapują dane do przestrzeni
+wyższego wymiaru. Jądro RBF (\textit{Radial Basis Function}) definiowane jest jako:
+
+\begin{equation}
+    K(\mathbf{x}_i, \mathbf{x}_j) = \exp\!\left(-\gamma \|\mathbf{x}_i - \mathbf{x}_j\|^2\right),
+\end{equation}
+
+gdzie $\gamma > 0$ jest parametrem szerokości jądra. Dla danych w przestrzeni
+784-wymiarowej SVC z jądrem RBF jest w stanie uchwycić złożone relacje między
+pikselami bez jawnej inżynierii cech.
+
+\subsubsection{Las Losowy (\textit{Random Forest})}
+
+Las Losowy~\cite{breiman2001} jest metodą łączącą (\textit{ensemble}) drzewa
+decyzyjne. Każde drzewo trenowane jest na losowej próbce danych
+(\textit{bootstrap}) i korzysta z losowego podzbioru cech przy każdym podziale.
+Klasyfikacja odbywa się przez głosowanie większościowe:
+
+\begin{equation}
+    \hat{y} = \arg\max_{c} \sum_{t=1}^{T} \mathbf{1}[h_t(\mathbf{x}) = c],
+\end{equation}
+
+gdzie $T$ to liczba drzew, a $h_t$ to $t$-te drzewo decyzyjne. Las Losowy jest
+odporny na przeuczenie i nie wymaga normalizacji danych wejściowych.
+
+\subsubsection{Konwolucyjna sieć neuronowa (CNN)}
+
+Konwolucyjne sieci neuronowe~\cite{lecun1989} są szczególnie efektywne dla danych
+obrazowych, ponieważ uczą przestrzennych filtrów bezpośrednio z pikseli.
+Architektura zastosowana w projekcie składa się z dwóch bloków konwolucyjnych
+(\texttt{Conv2D} $\to$ \texttt{MaxPool2D}), warstwy spłaszczającej (\texttt{Flatten})
+i gęstej warstwy wyjściowej z funkcją \textit{softmax}.
+
+CNN operuje na siatce pikseli $28 \times 28$, co pozwala jej wychwytywać
+lokalne wzorce (krawędzie, narożniki, faktury) niedostępne dla klasyfikatorów
+operujących na spłaszczonym wektorze cech.
+
+\subsection{Detekcja dłoni --- MediaPipe}
+
+MediaPipe~\cite{lugaresi2019} jest platformą Google do uczenia maszynowego
+na urządzeniach końcowych. Moduł \textit{Gesture Recognizer} wykrywa dłoń
+w klatce wideo i zwraca 21 punktów kluczowych (\textit{landmarks}) w przestrzeni
+3D. Na ich podstawie wyznaczany jest prostokąt otaczający (\textit{bounding box}),
+który jest przycinany i przeskalowywany do formatu $28 \times 28$ pikseli.
+
+\subsection{Normalizacja cech}
+
+Wartości pikseli z zakresu $[0, 255]$ są normalizowane do przedziału $[0, 1]$
+przez proste dzielenie:
+\[
+    x' = \frac{x}{255{,}0}.
+\]
+Zapewnia to zgodność formatu z danymi treningowymi ze zbioru Sign Language MNIST.

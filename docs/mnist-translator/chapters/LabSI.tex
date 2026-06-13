@@ -1,0 +1,60 @@
+\chapter{Metryka i realizacja projektu}
+\label{cha:LabSI}
+\makeatletter
+
+% *********************************************************************
+% W poniższej metryczce należy uzupełnić informacje o:
+% - temacie ćwiczenia
+% - numerze ćwiczenia
+% - numerze grupy laboratoryjnej
+% - numerze zespołu
+% - dacie wykonania oraz oddania ćwiczenia
+% *********************************************************************
+
+\begin{table}[H]
+    \centering
+    \renewcommand{\tabularxcolumn}[1]{m{#1}}
+    \newcolumntype{C}{>{\centering\arraybackslash}X}
+    \begin{tabularx}{\linewidth}{|C|C|}
+        \hline
+        \multicolumn{2}{|c|}{\makecell{\textbf{\Large{Sztuczna Inteligencja}} \\ \textbf{Sprawozdanie projektowe}}} \\ \hline
+        \multicolumn{1}{|l|}{Temat} & Klasyfikacja znaków dłoni (Sign Language MNIST) \\ \hline
+        \multicolumn{1}{|l|}{Ćwiczenie nr:} & Projekt semestralny \\ \hline
+        \multicolumn{1}{|l|}{Autorzy:} & \@author \\ \hline
+        \multicolumn{1}{|l|}{Grupa laboratoryjna} & XX (do uzupełnienia) \\ \hline
+        \multicolumn{1}{|l|}{Zespół nr:} & XX (do uzupełnienia) \\ \hline
+        \multicolumn{1}{|l|}{Data wykonania ćwiczenia} & czerwiec 2026 \\ \hline
+        \multicolumn{1}{|l|}{Data oddania ćwiczenia} & czerwiec 2026 \\ \hline
+    \end{tabularx}
+\end{table}
+
+\section{Opis realizacji}
+W projekcie zaimplementowano aplikację CLI do klasyfikacji znaków dłoni na bazie
+zbioru Sign Language MNIST. Aplikacja obsługuje trzy tryby pracy:
+\texttt{train}, \texttt{eval} oraz \texttt{infer}. Architektura kodu została
+podzielona na moduły danych, modelowania i inferencji.
+
+\section{Wykorzystane narzędzia}
+W realizacji wykorzystano:
+\begin{itemize}
+    \item Python oraz menedżer środowiska \texttt{uv},
+    \item \texttt{numpy}, \texttt{pandas}, \texttt{scikit-learn},
+    \item \texttt{tensorflow} dla modelu CNN,
+    \item \texttt{opencv-python} i \texttt{mediapipe} dla inferencji kamerowej,
+    \item \texttt{pytest} i \texttt{ruff} do walidacji jakości kodu.
+\end{itemize}
+
+\section{Zakres funkcjonalny}
+Zaimplementowane funkcje systemu:
+\begin{enumerate}
+    \item trening modelu i zapis artefaktu,
+    \item ewaluacja jakości na zbiorze testowym,
+    \item inferencja z pojedynczego rekordu CSV,
+    \item inferencja online z kamery z podglądem detekcji.
+\end{enumerate}
+
+\section{Wynik końcowy}
+Otrzymano działający prototyp klasyfikatora znaków dłoni, który może być
+uruchamiany lokalnie i rozszerzany o kolejne metody modelowania.
+Dokumentację przygotowano w oparciu o rzeczywistą strukturę kodu i aktualny
+stan repozytorium.

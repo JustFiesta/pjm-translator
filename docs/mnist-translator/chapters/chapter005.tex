@@ -1,0 +1,160 @@
+\chapter{Wnioski i dodatek}
+\label{cha:chapter005}
+
+\section{Wnioski}
+
+\begin{enumerate}
+    \item \textbf{CNN przewyższa metody klasyczne} na zadaniu klasyfikacji
+          znaków ASL: osiąga 92\% dokładności wobec 82\% dla SVC i Lasu
+          Losowego. Architektura konwolucyjna jest naturalnie dostosowana
+          do danych obrazowych.
+    \item \textbf{SVC i Las Losowy osiągają identyczną dokładność} (82\%)
+          pomimo różnych strategii uczenia, co sugeruje, że obie metody
+          osiągnęły podobną granicę dla tej reprezentacji danych.
+    \item \textbf{Jakość inferencji kamerowej zależy od warunków zewnętrznych}
+          --- oświetlenia, tła i pozycji dłoni --- bardziej niż od wyboru
+          klasyfikatora.
+    \item \textbf{MediaPipe odgrywa kluczową rolę} w przygotowaniu wejścia
+          modelu; bez etapu detekcji dłoni system nie nadaje się do praktycznego
+          zastosowania.
+    \item \textbf{Podejście pikselowe ma istotne ograniczenia praktyczne}.
+          Reprezentacja oparta na punktach kluczowych mogłaby znacząco
+          poprawić odporność systemu na zmienne warunki otoczenia.
+    \item \textbf{Modularna architektura projektu} (rozdzielenie warstw danych,
+          modeli i inferencji) ułatwia wymianę komponentów i jest dobrą
+          praktyką inżynierską w projektach uczenia maszynowego.
+\end{enumerate}
+
+\section*{Dodatek: Instrukcja samodzielnej realizacji ćwiczenia}
+\addcontentsline{toc}{section}{Dodatek: Instrukcja samodzielnej realizacji ćwiczenia}
+
+Poniższy przewodnik umożliwia samodzielne przeprowadzenie ćwiczenia od
+konfiguracji środowiska po uruchomienie inferencji na żywo.
+
+\subsection*{Krok 1: Pobranie repozytorium}
+
+\begin{lstlisting}[style=styleBash, numbers=none, caption={Klonowanie repozytorium}, label=lst:clone]
+git clone https://github.com/JustFiesta/mnist-translator.git
+cd mnist-translator
+\end{lstlisting}
+
+\subsection*{Krok 2: Instalacja środowiska Python}
+
+\begin{lstlisting}[style=styleBash, numbers=none, caption={Konfiguracja środowiska wirtualnego}, label=lst:venv]
+# Instalacja Pythona 3.13 przez menedzera uv
+uv python install 3.13
+uv venv --python 3.13
+
+# Windows PowerShell
+.venv\Scripts\Activate.ps1
+
+# Linux / macOS
+source .venv/bin/activate
+
+# Instalacja zaleznosci z pliku lock
+uv sync
+\end{lstlisting}
+
+\subsection*{Krok 3: Pobranie zbioru danych}
+
+\begin{enumerate}
+    \item Przejdź na stronę Kaggle:\\
+          \url{https://www.kaggle.com/datasets/datamunge/sign-language-mnist/data}
+    \item Pobierz pliki \texttt{sign\_mnist\_train.csv} i \texttt{sign\_mnist\_test.csv}.
+    \item Utwórz katalog docelowy i umieść w nim pobrane pliki:
+\end{enumerate}
+
+\begin{lstlisting}[style=styleBash, numbers=none, caption={Przygotowanie struktury katalogów na dane}, label=lst:dirs]
+# Windows PowerShell
+New-Item -ItemType Directory -Path data/raw -Force
+
+# Linux / macOS
+mkdir -p data/raw
+
+# Skopiuj pobrane pliki CSV do katalogu data/raw/
+\end{lstlisting}
+
+\subsection*{Krok 4: Trenowanie modeli}
+
+\begin{lstlisting}[style=styleBash, numbers=none, caption={Trenowanie wszystkich trzech klasyfikatorów}, label=lst:train-all]
+# SVC (domyslny, najszybszy)
+uv run python main.py train
+
+# Las Losowy
+uv run python main.py train --classifier rf --model artifacts/rf_model.pkl
+
+# CNN (trenowanie moze zajac kilka minut)
+uv run python main.py train --classifier cnn --model artifacts/cnn_model.keras
+\end{lstlisting}
+
+\subsection*{Krok 5: Ewaluacja modeli}
+
+\begin{lstlisting}[style=styleBash, numbers=none, caption={Ewaluacja wytrenowanych modeli}, label=lst:eval-all]
+# Ewaluacja SVC
+uv run python main.py eval \
+    --model artifacts/svc_model.pkl \
+    --dataset data/raw/sign_mnist_test.csv
+
+# Ewaluacja Lasu Losowego
+uv run python main.py eval \
+    --model artifacts/rf_model.pkl \
+    --dataset data/raw/sign_mnist_test.csv
+
+# Ewaluacja CNN
+uv run python main.py eval \
+    --model artifacts/cnn_model.keras \
+    --dataset data/raw/sign_mnist_test.csv
+\end{lstlisting}
+
+Zanotuj dokładność każdego modelu i porównaj z wynikami z tabeli~\ref{tab:wyniki}.
+
+\subsection*{Krok 6: Inferencja offline (z pliku CSV)}
+
+\begin{lstlisting}[style=styleBash, numbers=none, caption={Inferencja na wybranym wierszu pliku CSV}, label=lst:infer-csv]
+uv run python main.py infer \
+    --source csv \
+    --row 42 \
+    --dataset data/raw/sign_mnist_test.csv \
+    --model artifacts/svc_model.pkl
+\end{lstlisting}
+
+\subsection*{Krok 7: Inferencja na żywo z kamery}
+
+\begin{lstlisting}[style=styleBash, numbers=none, caption={Uruchomienie inferencji w czasie rzeczywistym}, label=lst:infer-live]
+uv run python main.py infer \
+    --source camera \
+    --camera 0 \
+    --model artifacts/svc_model.pkl
+\end{lstlisting}
+
+\textbf{Uwagi:}
+\begin{itemize}
+    \item Przy pierwszym uruchomieniu aplikacja automatycznie pobierze plik
+          modelu MediaPipe (\texttt{gesture\_recognizer.task}) --- wymagany
+          jest dostęp do Internetu.
+    \item Naciśnij klawisz \texttt{q}, aby zakończyć działanie okna kamery.
+    \item Jeśli kamera nie jest wykrywana pod indeksem 0, spróbuj
+          opcji \texttt{-{}-camera 1}.
+\end{itemize}
+
+\subsection*{Krok 8: Uruchomienie testów jednostkowych}
+
+\begin{lstlisting}[style=styleBash, numbers=none, caption={Uruchamianie testów pytest}, label=lst:tests]
+# Wszystkie testy
+uv run pytest
+
+# Testy z raportem pokrycia kodu
+uv run pytest --cov=src --cov-report=term-missing
+\end{lstlisting}
+
+\subsection*{Pytania kontrolne}
+
+\begin{enumerate}
+    \item Dlaczego litery J i Z nie są uwzględnione w zbiorze Sign Language MNIST?
+    \item Jaką rolę pełni MediaPipe w potoku inferencji kamerowej?
+    \item Co oznacza stratyfikowany podział danych i dlaczego jest ważny
+          przy niezbalansowanych klasach?
+    \item Jaka jest różnica między parametrami $C$ i $\gamma$ w SVC z jądrem RBF?
+    \item Dlaczego CNN osiąga wyższą dokładność niż SVC na danych obrazowych?
+    \item W jaki sposób można poprawić odporność systemu na zmienne oświetlenie?
+\end{enumerate}
