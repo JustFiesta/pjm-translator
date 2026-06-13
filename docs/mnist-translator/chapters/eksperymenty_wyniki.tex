@@ -1,15 +1,13 @@
-\chapter{Eksperymenty i wyniki}
+\chapter{Eksperymenty}
 \label{cha:chapter003}
 
-\section{Opis eksperymentów}
-
-\subsection{Cel eksperymentów}
+\section{Cel eksperymentów}
 
 Eksperymenty miały na celu porównanie trzech metod klasyfikacji pod względem
 dokładności na tych samych danych testowych oraz jakości predykcji w warunkach
 rzeczywistych (inferencja z kamery).
 
-\subsection{Podział danych}
+\section{Podział danych}
 
 Dane treningowe z pliku \texttt{sign\_mnist\_train.csv} zostały podzielone
 stratyfikowanie na podzbiory:
@@ -23,7 +21,7 @@ stratyfikowanie na podzbiory:
 Plik \texttt{sign\_mnist\_test.csv} (7\,172 próbki) pełnił rolę niezależnego
 zbioru testowego wymaganego przez dokumentację projektu.
 
-\subsection{Procedura trenowania i ewaluacji}
+\section{Procedura trenowania i ewaluacji}
 
 Dla każdego klasyfikatora procedura była identyczna:
 
@@ -35,7 +33,7 @@ Dla każdego klasyfikatora procedura była identyczna:
     \item Ewaluacja na niezależnym zbiorze testowym.
 \end{enumerate}
 
-\subsubsection{Trenowanie SVC}
+\subsection{Trenowanie SVC}
 
 \begin{lstlisting}[style=styleBash, caption={Polecenie trenowania klasyfikatora SVC}, label=lst:train-svc]
 uv run python main.py train \
@@ -44,7 +42,7 @@ uv run python main.py train \
     --dataset data/raw/sign_mnist_train.csv
 \end{lstlisting}
 
-\subsubsection{Trenowanie Lasu Losowego}
+\subsection{Trenowanie Lasu Losowego}
 
 \begin{lstlisting}[style=styleBash, caption={Polecenie trenowania Lasu Losowego}, label=lst:train-rf]
 uv run python main.py train \
@@ -53,7 +51,7 @@ uv run python main.py train \
     --dataset data/raw/sign_mnist_train.csv
 \end{lstlisting}
 
-\subsubsection{Trenowanie CNN}
+\subsection{Trenowanie CNN}
 
 \begin{lstlisting}[style=styleBash, caption={Polecenie trenowania CNN}, label=lst:train-cnn]
 uv run python main.py train \
@@ -62,7 +60,7 @@ uv run python main.py train \
     --dataset data/raw/sign_mnist_train.csv
 \end{lstlisting}
 
-\subsubsection{Ewaluacja modeli}
+\subsection{Ewaluacja modeli}
 
 \begin{lstlisting}[style=styleBash, caption={Ewaluacja modelu SVC na zbiorze testowym}, label=lst:eval]
 uv run python main.py eval \
@@ -73,7 +71,7 @@ uv run python main.py eval \
 Wynikiem jest dokładność globalna oraz raport \texttt{classification\_report}
 ze scikit-learn zawierający precyzję, czułość i miarę F1 dla każdej klasy.
 
-\subsection{Test w warunkach rzeczywistych}
+\section{Test w warunkach rzeczywistych}
 
 Po wytrenowaniu modeli przeprowadzono testy jakościowe z użyciem kamery
 internetowej, zachowując warunki zestawione w tabeli~\ref{tab:warunki}.
@@ -87,7 +85,6 @@ uv run python main.py infer \
     --model artifacts/svc_model.pkl
 \end{lstlisting}
 
-\newpage
 \subsection{Obserwacje jakościowe z inferencji kamerowej}
 
 \begin{itemize}
@@ -101,44 +98,3 @@ uv run python main.py infer \
 
 We wszystkich modelach litery wizualnie podobne (np. M/N, R/U) powodowały
 częstsze błędy klasyfikacji.
-
-\section{Dyskusja wyników}
-
-\subsection{Przewaga CNN nad metodami klasycznymi}
-
-Różnica 10 punktów procentowych na korzyść CNN wynika z fundamentalnej cechy
-architektury: warstwy konwolucyjne uczą się hierarchicznych reprezentacji
-przestrzennych --- krawędzi, narożników i wzorców wyższego rzędu --- których
-płaski wektor 784 cech nie przekazuje. SVC i RF operują na przestrzeni
-784-wymiarowej bez żadnego uwzględnienia sąsiedztwa pikseli.
-
-\subsection{Równoważność SVC i Lasu Losowego}
-
-Zbliżona dokładność obu metod (82\%) sugeruje, że granica decyzyjna
-jest podobnie złożona: wystarczająco skomplikowana, by wymagać nieliniowych
-metod, ale niewystarczająco złożona, by jedna metoda miała wyraźną przewagę
-bez dalszego strojenia hiperparametrów.
-
-\subsection{Ograniczenia podejścia pikselowego}
-
-Operowanie na surowych pikselach po normalizacji wiąże się z istotnymi
-ograniczeniami praktycznymi:
-
-\begin{itemize}
-    \item \textbf{Wrażliwość na oświetlenie} --- zmiana natężenia lub kierunku
-          światła modyfikuje wartości pikseli i może prowadzić do błędnych
-          predykcji.
-    \item \textbf{Wrażliwość na pozycję} --- dłoń musi być wycentrowana w kadrze
-          i podobnej skali co próbki treningowe.
-    \item \textbf{Brak niezmienności geometrycznej} --- modele nie są z natury
-          niezmiennicze na obrót, skalę ani przesunięcie; CNN częściowo
-          kompensuje to przez operację \textit{max pooling}.
-\end{itemize}
-
-\subsection{Rola MediaPipe w systemie}
-
-Kluczową rolą MediaPipe jest dostarczenie bounding boxa dłoni, dzięki czemu
-przycięty i przeskalowany fragment klatki jest znacznie bardziej zbliżony
-do próbek treningowych niż surowy obraz z kamery. Bez tego kroku predykcje
-byłyby praktycznie bezużyteczne. Jednocześnie MediaPipe bywa zawodny
-przy słabym oświetleniu lub gdy dłoń nie jest wyraźnie wyeksponowana.

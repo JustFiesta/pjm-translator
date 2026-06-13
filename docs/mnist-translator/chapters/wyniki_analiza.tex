@@ -1,21 +1,7 @@
 \chapter{Wyniki i analiza}
 \label{cha:elementyPracy}
 
-\section{Założenia środowiska testowego}
-\label{sec:warunki_testowe}
-
-Podczas weryfikacji inferencji kamerowej przyjęto następujące warunki:
-\begin{itemize}
-    \item równomierne oświetlenie bez silnych cieni,
-    \item jednolite tło ograniczające fałszywe detekcje,
-    \item dłoń ustawiona frontalnie względem kamery,
-    \item wyłączone odbicie lustrzane obrazu.
-\end{itemize}
-
-Zmiana warunków oświetlenia lub geometrii kadru obniża jakość detekcji dłoni,
-a tym samym stabilność predykcji.
-
-\subsection{Dokładność na zbiorze testowym}
+\section{Dokładność na zbiorze testowym}
 
 \begin{table}[H]
     \centering
@@ -36,24 +22,22 @@ CNN osiąga wyraźnie wyższą dokładność (92\%) w porównaniu z SVC i RF (ob
 Wynik jest spójny z literaturą --- architektury konwolucyjne są naturalnie
 przystosowane do danych obrazowych.
 
+\section{Dyskusja wyników}
 
-\section{Analiza jakości inferencji w czasie rzeczywistym}
-\label{sec:analiza_live}
+\subsection{Przewaga CNN nad metodami klasycznymi}
 
-W trybie \texttt{infer --source camera} system wykonuje predykcję dla każdej
-klatki wejściowej. Jakość predykcji zależy od:
-\begin{enumerate}
-    \item poprawnej detekcji konturu dłoni przez MediaPipe,
-    \item jakości kadrowania i skalowania do 28$\times$28,
-    \item zgodności rozkładu danych wejściowych z rozkładem treningowym.
-\end{enumerate}
+Różnica 10 punktów procentowych na korzyść CNN wynika z fundamentalnej cechy
+architektury: warstwy konwolucyjne uczą się hierarchicznych reprezentacji
+przestrzennych --- krawędzi, narożników i wzorców wyższego rzędu --- których
+płaski wektor 784 cech nie przekazuje. SVC i RF operują na przestrzeni
+784-wymiarowej bez żadnego uwzględnienia sąsiedztwa pikseli.
 
-Najczęstsze problemy obserwowane podczas demonstracji:
-\begin{itemize}
-    \item brak dostępu do kamery (\texttt{camera index} zajęty),
-    \item słaba separacja dłoni od tła,
-    \item częściowe wyjście dłoni poza obszar kadru.
-\end{itemize}
+\subsection{Równoważność SVC i Lasu Losowego}
+
+Zbliżona dokładność obu metod (82\%) sugeruje, że granica decyzyjna
+jest podobnie złożona: wystarczająco skomplikowana, by wymagać nieliniowych
+metod, ale niewystarczająco złożona, by jedna metoda miała wyraźną przewagę
+bez dalszego strojenia hiperparametrów.
 
 \section{Ograniczenia obecnej wersji}
 \label{sec:ograniczenia}
@@ -61,9 +45,17 @@ Najczęstsze problemy obserwowane podczas demonstracji:
 Wersja aktualna jest rozwiązaniem klasyfikacji pojedynczych klatek i nie
 modeluje dynamiki ruchu. Oznacza to, że:
 \begin{itemize}
-    \item znaki wymagające ruchu (np. J, Z) nie są klasyfikowane,
-    \item brak jest mechanizmu wygładzania predykcji po czasie,
-    \item brak detekcji kontekstu sekwencji gestów.
+    \item \textbf{Znak J i Z} --- znaki wymagające ruchu (np. J, Z) nie są klasyfikowane,
+    \item \textbf{Brak mechanizmu} ---  wygładzania predykcji po czasie,
+    \item \textbf{Brak detekcji kontekstu} --- kontekstu sekwencji gestów.
+    \item \textbf{Wrażliwość na oświetlenie} --- zmiana natężenia lub kierunku
+    światła modyfikuje wartości pikseli i może prowadzić do błędnych
+    predykcji.
+    \item \textbf{Wrażliwość na pozycję} --- dłoń musi być wycentrowana w kadrze
+        i podobnej skali co próbki treningowe.
+    \item \textbf{Brak niezmienności geometrycznej} --- modele nie są z natury
+    niezmiennicze na obrót, skalę ani przesunięcie; CNN częściowo
+    kompensuje to przez operację \textit{max pooling}.
 \end{itemize}
 
 Mimo tych ograniczeń projekt spełnia cel dydaktyczny i demonstracyjny:
